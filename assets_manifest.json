@@ -1,0 +1,97 @@
+{
+  "_version": 2,
+  "_description": "Asset manifest for StyleGAN HF demo — Phase 2 fixed version. All paths relative to hf_space_demo root.",
+  "assets": {
+    "faces": {
+      "files": ["assets/faces/000.png", "...", "assets/faces/049.png"],
+      "count": 50,
+      "required": true,
+      "format": "RGB PNG, 512×512",
+      "fallback_behavior": "create_fallback_placeholder() renders a dark gradient card with text",
+      "source_hint": "Run python downloader.py — pulls from thispersondoesnotexist-style sources"
+    },
+    "truncation": {
+      "psi_low": {
+        "path": "assets/truncation/psi_low.png",
+        "required": false,
+        "fallback_behavior": "get_real_face(3) — a conservatively-selected pool face used as proxy",
+        "description": "A photorealistic, unremarkable face representing low-ψ output (average-looking)",
+        "source_hint": "Manually select face index 3 from your 50-face pool, or source from FFHQ gallery"
+      },
+      "psi_mid": {
+        "path": "assets/truncation/psi_mid.png",
+        "required": false,
+        "fallback_behavior": "get_real_face(22) — balanced-looking pool face",
+        "description": "A balanced, distinct but photorealistic face representing ψ=0.7 sweet spot",
+        "source_hint": "Manually select face index 22 from your 50-face pool"
+      },
+      "psi_high": {
+        "path": "assets/truncation/psi_high.png",
+        "required": false,
+        "fallback_behavior": "get_real_face(41) — more unusual/distinctive pool face",
+        "description": "A face with distinctive/unusual features representing high-ψ extrapolation",
+        "source_hint": "Manually select face index 41 from your 50-face pool, or use a StyleGAN2 high-psi sample"
+      }
+    },
+    "mixing": {
+      "mix_matrix": {
+        "path": "assets/mixing/mix_matrix.png",
+        "required": false,
+        "recommended": true,
+        "fallback_behavior": "Image compositing proxy runs with honest disclosure label shown to user",
+        "description": "Figure 3 from Karras et al. CVPR 2019 — 4×4 grid of style-mixed faces. PRIMARY visual for Tab 3.",
+        "source_hint": "Extract from StyleGAN paper PDF Section 3 (page 5). Crop to just the grid. Resize to ~900×300 for 3-column display. Or run real StyleGAN2 inference with mixing enabled.",
+        "ideal_size": "900×300 or any aspect that fits the 3-column Gradio layout"
+      }
+    },
+    "interpolation": {
+      "interp_strip": {
+        "path": "assets/interpolation/interp_strip.png",
+        "required": false,
+        "fallback_behavior": "Button loads nothing (returns None gracefully) — Gradio shows empty image with no crash",
+        "description": "5-frame horizontal strip showing true W-space interpolation: α=0.0, 0.25, 0.5, 0.75, 1.0. Must be a realistic face at midpoint, NOT a ghost double-exposure.",
+        "source_hint": "Most impactful asset to source. Options: (1) rosinality/stylegan2-pytorch interpolation video frame capture. (2) NVlabs stylegan2 with --generate-images --truncation-psi=0.7. (3) Screenshot from a runwayml or Hugging Face inference demo.",
+        "ideal_size": "900×180 (5 frames at 180×180 each)"
+      }
+    },
+    "versions": {
+      "v1_artifact": {
+        "path": "assets/versions/v1_artifact.png",
+        "required": false,
+        "fallback_behavior": "_add_blob_artifacts() applies computed blobs at anatomically-correct zones (chin/ear/hair)",
+        "description": "A StyleGAN1 output showing real water-droplet / blob artifacts. Blobs should appear at chin, ear boundaries, hair region — NOT on nose or eyes.",
+        "source_hint": "Google 'StyleGAN1 water droplet artifact' Images. Or run early StyleGAN1 checkpoint. Karras 2019 paper Fig. 1 shows examples."
+      },
+      "v2_clean": {
+        "path": "assets/versions/v2_clean.png",
+        "required": false,
+        "fallback_behavior": "get_real_face(7) — clean face from pool used directly as V2 output",
+        "description": "A clean StyleGAN2 output face with no artifacts — paired with v1_artifact if possible (same seed/latent but different V1 vs V2 checkpoint).",
+        "source_hint": "NVlabs/stylegan2 official checkpoint FFHQ-1024 or any clean HF Space output"
+      },
+      "v3_comparison": {
+        "path": "assets/versions/v3_comparison.png",
+        "required": false,
+        "fallback_behavior": "_make_v3_description_card() creates an informative text card — NO pixel shift used",
+        "description": "Optional: a visual from Karras et al. NeurIPS 2021 Figure 1 showing alias-free equivariance, or a side-by-side still of StyleGAN2 vs StyleGAN3 outputs. If not present, the description card is used instead.",
+        "source_hint": "Karras 2021 NeurIPS paper Figure 1. Or stylegan3 GitHub page header comparison.",
+        "warning": "Do NOT use np.roll image shifting — it shows face offset in frame, which is WRONG for alias-free concept. Only use a real comparison image or the text card fallback."
+      }
+    },
+    "noise_variants": {
+      "pattern": "assets/noise_variants/seed{seed:02d}_n{1-3}.png",
+      "required": false,
+      "fallback_behavior": "Gaussian noise applied to same face at 3 intensity levels as proxy — labeled 'Simulated B variation'",
+      "description": "Pre-generated face variants: same seed (same W / identity) but different stochastic noise B injection. 3 files per seed. Ideal seeds to pre-generate: 7, 10, 22, 42.",
+      "ideal_size": "256×256",
+      "source_hint": "Run StyleGAN2 inference with fixed seed but noise_mode='random' three times: python generate.py --seeds=7 --noise-mode=random (repeat 3x, rename outputs). Requires an NVlabs StyleGAN2 environment or rosinality fork."
+    }
+  },
+  "summary": {
+    "hard_required": ["assets/faces/000.png ... 049.png"],
+    "high_impact_optional": ["assets/mixing/mix_matrix.png", "assets/interpolation/interp_strip.png"],
+    "nice_to_have_optional": ["assets/truncation/psi_low.png", "assets/truncation/psi_mid.png", "assets/truncation/psi_high.png", "assets/versions/v1_artifact.png", "assets/versions/v2_clean.png"],
+    "low_priority_optional": ["assets/versions/v3_comparison.png", "assets/noise_variants/"],
+    "note": "All fallbacks produce a non-crashing, honest output. The demo works fine with only assets/faces/ populated."
+  }
+}
